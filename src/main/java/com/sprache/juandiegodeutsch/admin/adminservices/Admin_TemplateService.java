@@ -28,6 +28,7 @@ public class Admin_TemplateService {
 
 
 
+    //Templates
     @Transactional
     public Template createTemplate(TemplateRequestDTO request) {
 
@@ -47,6 +48,19 @@ public class Admin_TemplateService {
 
 
 
+    public void deleteTemplate(Long id_template){
+       if(!templateRepository.existsById(id_template)){
+           throw new RuntimeException("Template with id "+ id_template + "doesnt exist");
+
+       }
+        templateRepository.deleteById(id_template);
+    }
+
+
+
+
+
+    //FLASHCARDS
 
     @Transactional
 public List<Template_flashcard> createTemplateFlashcards(Template_FlashcardRequestDTO request) {
@@ -78,6 +92,16 @@ public List<Template_flashcard> createTemplateFlashcards(Template_FlashcardReque
     }
 
 
+
+
+
+    public void deleteFlashcard(Long id_Flashcard){
+        if(!templateFlashcardRepository.existsById(id_Flashcard)){
+            throw new RuntimeException("Template with id "+ id_Flashcard + "doesnt exist");
+
+        }
+        templateFlashcardRepository.deleteById(id_Flashcard);
+    }
 
 
 

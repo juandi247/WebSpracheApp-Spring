@@ -42,10 +42,10 @@ public class AdministratorController {
     }
 
 
+//minigame words
 
 
-
-    @GetMapping("/get_words")
+    @GetMapping("/minigame/get_words")
     public ResponseEntity<Minigame_Word_ResponseDTO> getWordsByCategory(@RequestParam String category ){
 
         Minigame_Word_ResponseDTO response=adminMinigameWordService.getwordsByCategory(category);
@@ -59,7 +59,7 @@ public class AdministratorController {
 
 
 
-    @PostMapping("/add_words")
+    @PostMapping("/minigame/add_words")
     public ResponseEntity<String> addWords(@RequestBody Minigame_Word_RequestDTO request) {
         try {
 
@@ -79,7 +79,12 @@ public class AdministratorController {
 
 
 
-    @PostMapping("/create_template")
+
+
+    //TEMLPATES
+
+
+    @PostMapping("/templates/create")
     public ResponseEntity<?> createTemplate(@Valid @RequestBody TemplateRequestDTO request) {
         try {
             adminTemplateService.createTemplate(request);
@@ -94,8 +99,26 @@ public class AdministratorController {
 
 
 
+    @DeleteMapping("/templates/delete/{id}")
+    public ResponseEntity<?> deleteTemplate(@PathVariable Long id){
+        try {
+            adminTemplateService.deleteTemplate(id);
+            return ResponseEntity.ok("Template with ID " + id + " was successfully deleted.");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
 
-    @PostMapping("/create_template_flashcards")
+    }
+
+
+
+
+
+
+    //FLASHCARDSSS
+
+
+    @PostMapping("/flashcard/create")
     public ResponseEntity<?> createTemplateFlashcards(@Valid @RequestBody Template_FlashcardRequestDTO request){
 
         try {
@@ -105,6 +128,19 @@ public class AdministratorController {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+
+
+    @DeleteMapping("/flashcard/delete/{id}")
+    public ResponseEntity<?> deleteTemplateFlashcard(@PathVariable Long id){
+        try {
+            adminTemplateService.deleteTemplate(id);
+            return ResponseEntity.ok("Flashcard with ID " + id + " was successfully deleted.");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+
     }
 
 }

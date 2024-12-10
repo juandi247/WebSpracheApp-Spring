@@ -30,7 +30,7 @@ public class Template {
 
 
     //Relation with template_flashcards table
-    @OneToMany(mappedBy = "template")
+    @OneToMany(mappedBy = "template", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Template_flashcard> template_flashcards;
 
 
