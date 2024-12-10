@@ -31,6 +31,7 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(authRequest ->
                         authRequest
                                 .requestMatchers("/auth/**").permitAll()
+                                .requestMatchers("/admin/**").hasAuthority("USER")
                                 .anyRequest().authenticated()
                 )
                 .sessionManagement(sessionManager -> sessionManager
