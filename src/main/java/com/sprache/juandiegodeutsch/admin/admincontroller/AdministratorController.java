@@ -11,12 +11,10 @@ import com.sprache.juandiegodeutsch.dtos.Template_FlashcardRequestDTO;
 import com.sprache.juandiegodeutsch.models.Minigame_word;
 import com.sprache.juandiegodeutsch.models.User;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.Response;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.function.EntityResponse;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -26,12 +24,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AdministratorController {
 
-
+//Dependencies inyections (services)
     private final Admin_Minigame_wordService adminMinigameWordService;
     private final Admin_UserService adminUserService;
     private final Admin_TemplateService adminTemplateService;
 
-
+//USERS
 
     @GetMapping("/users")
     public ResponseEntity<Page<User>> getAllUsers(@RequestParam(defaultValue = "0") int page)
@@ -44,9 +42,8 @@ public class AdministratorController {
 
 //minigame words
 
-
-    @GetMapping("/minigame/get_words")
-    public ResponseEntity<Minigame_Word_ResponseDTO> getWordsByCategory(@RequestParam String category ){
+@GetMapping("/minigame/get_words")
+public ResponseEntity<Minigame_Word_ResponseDTO> getWordsByCategory(@RequestParam String category ){
 
         Minigame_Word_ResponseDTO response=adminMinigameWordService.getwordsByCategory(category);
 
@@ -57,10 +54,8 @@ public class AdministratorController {
     }
 
 
-
-
-    @PostMapping("/minigame/add_words")
-    public ResponseEntity<String> addWords(@RequestBody Minigame_Word_RequestDTO request) {
+@PostMapping("/minigame/add_words")
+public ResponseEntity<String> addWords(@RequestBody Minigame_Word_RequestDTO request) {
         try {
 
             List<Minigame_word> addedWords = adminMinigameWordService.createWords(request);
@@ -75,6 +70,22 @@ public class AdministratorController {
                     .body("Failed to add words: " + e.getMessage());
         }
     }
+
+
+
+
+@DeleteMapping("/minigame/deleteword/{id}")
+public ResponseEntity<?> deleteWord(@PathVariable Long id){
+        try {
+            adminMinigameWordService.deleteWord(id);
+            return ResponseEntity.ok("Word with ID " + id + " was successfully deleted.");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+
+    }
+
+
 
 
 
@@ -135,7 +146,7 @@ public class AdministratorController {
     @DeleteMapping("/flashcard/delete/{id}")
     public ResponseEntity<?> deleteTemplateFlashcard(@PathVariable Long id){
         try {
-            adminTemplateService.deleteTemplate(id);
+            adminTemplateService.deleteFlashcard(id);
             return ResponseEntity.ok("Flashcard with ID " + id + " was successfully deleted.");
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());

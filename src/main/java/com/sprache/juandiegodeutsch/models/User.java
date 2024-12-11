@@ -47,9 +47,12 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user")
     private List<Deck> decks;
 
+    @OneToMany(mappedBy = "user")
+    private List<Flashcard> flashcards;
 
     @OneToMany(mappedBy = "user")
     private List<Progress> progresses;
+
 
 
 

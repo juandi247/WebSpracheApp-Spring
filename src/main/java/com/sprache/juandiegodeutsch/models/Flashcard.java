@@ -2,9 +2,13 @@ package com.sprache.juandiegodeutsch.models;
 
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name= "Flaschards")
+@Getter
+@Setter
 public class Flashcard {
 
 
@@ -28,9 +32,16 @@ public class Flashcard {
     private Deck deck;
 
 
+    @ManyToOne
+    @JoinColumn(name = "id_user")
+    private User user;
+
     //Relation with progress
 
-    @OneToOne(mappedBy = "flashcard")
+
+
+
+    @OneToOne(mappedBy = "flashcard", cascade = CascadeType.ALL, orphanRemoval = true)
     private Progress progress;
 
 

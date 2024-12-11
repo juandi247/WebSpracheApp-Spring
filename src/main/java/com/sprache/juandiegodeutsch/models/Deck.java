@@ -2,12 +2,16 @@ package com.sprache.juandiegodeutsch.models;
 
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
 @Table(name = "Decks")
+@Getter
+@Setter
 public class Deck {
 
 
@@ -30,7 +34,7 @@ public class Deck {
     private User user;
 
     //Relation with flashcards table
-    @OneToMany(mappedBy = "deck")
+    @OneToMany(mappedBy = "deck",cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Flashcard> flashcards;
 
 }

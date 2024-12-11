@@ -46,8 +46,6 @@ public class Admin_TemplateService {
 
 
 
-
-
     public void deleteTemplate(Long id_template){
        if(!templateRepository.existsById(id_template)){
            throw new RuntimeException("Template with id "+ id_template + "doesnt exist");

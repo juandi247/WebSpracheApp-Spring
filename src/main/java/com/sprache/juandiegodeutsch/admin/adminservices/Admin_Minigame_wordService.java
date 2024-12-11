@@ -72,7 +72,19 @@ public class Admin_Minigame_wordService {
 
 
 
+
+    public void deleteWord(Long id_template){
+        if(!minigameWordRepository.existsById(id_template)){
+            throw new RuntimeException("Word with id "+ id_template + "doesnt exist");
+
+        }
+        minigameWordRepository.deleteById(id_template);
     }
+
+
+
+
+}
 
 
 
