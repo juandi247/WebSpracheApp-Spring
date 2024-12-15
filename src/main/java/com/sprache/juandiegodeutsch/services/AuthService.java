@@ -46,14 +46,16 @@ public class AuthService {
 
 
         //looking into the db for the name
-        UserDetails user = userRepository.findByUsername(request.getUsername()).orElseThrow();
+        User user = userRepository.findByUsername(request.getUsername()).orElseThrow();
 
 
         String token = jwtService.getToken(user);
 
+
         //returning the token from the user
         return AuthResponseDTO.builder()
                 .token(token)
+                .role(user.getRole().name())
                 .build();
 
     }
@@ -92,7 +94,7 @@ public class AuthService {
                 .password(encodedPassword)
                 .email(request.getEmail())
                 .role(Role.USER)
-                .creation_date(LocalDateTime.now())
+                .creationDate(LocalDateTime.now())
                 .streak(0)
                 .build();
 
@@ -102,6 +104,7 @@ public class AuthService {
         //Generation of a new token for the new user
         return AuthResponseDTO.builder()
                 .token(jwtService.getToken(user))
+                .role(user.getRole().name())
                 .build();
     }
 }

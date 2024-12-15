@@ -1,6 +1,7 @@
 package com.sprache.juandiegodeutsch.admin.adminservices;
 
 
+import com.sprache.juandiegodeutsch.dtos.AdminGetUsersResponseDTO;
 import com.sprache.juandiegodeutsch.models.User;
 import com.sprache.juandiegodeutsch.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,8 +18,20 @@ public class Admin_UserService {
     private final UserRepository userRepository;
 
 
-    public Page<User> getAllUsers(int page, int size) {
+    public Page<AdminGetUsersResponseDTO> getAllUsers(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return userRepository.findAll(pageable);
+
+        Page<User> users = userRepository.findAllByOrderByCreationDateDesc(pageable);
+
+        Page<AdminGetUsersResponseDTO> dtoPage = users.map(user -> new AdminGetUsersResponseDTO(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getCreationDate(),
+                user.getRole()
+
+        ));
+
+        return dtoPage;
     }
 }

@@ -4,10 +4,7 @@ package com.sprache.juandiegodeutsch.admin.admincontroller;
 import com.sprache.juandiegodeutsch.admin.adminservices.Admin_Minigame_wordService;
 import com.sprache.juandiegodeutsch.admin.adminservices.Admin_TemplateService;
 import com.sprache.juandiegodeutsch.admin.adminservices.Admin_UserService;
-import com.sprache.juandiegodeutsch.dtos.Minigame_Word_RequestDTO;
-import com.sprache.juandiegodeutsch.dtos.Minigame_Word_ResponseDTO;
-import com.sprache.juandiegodeutsch.dtos.TemplateRequestDTO;
-import com.sprache.juandiegodeutsch.dtos.Template_FlashcardRequestDTO;
+import com.sprache.juandiegodeutsch.dtos.*;
 import com.sprache.juandiegodeutsch.models.Minigame_word;
 import com.sprache.juandiegodeutsch.models.User;
 import lombok.RequiredArgsConstructor;
@@ -32,13 +29,13 @@ public class AdministratorController {
 //USERS
 
     @GetMapping("/users")
-    public ResponseEntity<Page<User>> getAllUsers(@RequestParam(defaultValue = "0") int page)
-    {
-        int fixedPageSize = 10;  // Tamaño fijo para todas las páginas
-        Page<User> users = adminUserService.getAllUsers(page, fixedPageSize);
+    public ResponseEntity<Page<AdminGetUsersResponseDTO>> getAllUsers(
+            @RequestParam(defaultValue = "0") int page
+    ) {
+        int fixedPageSize = 10;
+        Page<AdminGetUsersResponseDTO> users = adminUserService.getAllUsers(page, fixedPageSize);
         return ResponseEntity.ok(users);
     }
-
 
 //minigame words
 

@@ -29,8 +29,6 @@ public class AuthController {
     //Login unprotected route
     @PostMapping("/login")
     public ResponseEntity<AuthResponseDTO> login(@RequestBody LoginRequestDTO request){
-
-
         return ResponseEntity.ok(authService.login(request));
     }
 
@@ -38,10 +36,14 @@ public class AuthController {
 
     //Register unprotected route
     @PostMapping("/register")
-    public ResponseEntity<AuthResponseDTO> register(@Valid @RequestBody RegisterRequestDTO request){
-        return ResponseEntity.ok(authService.register(request));
+    public ResponseEntity<Object> register(@Valid @RequestBody RegisterRequestDTO request) {
+        try {
+            AuthResponseDTO response = authService.register(request);
+            return ResponseEntity.ok(response);
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
-
 
 
 

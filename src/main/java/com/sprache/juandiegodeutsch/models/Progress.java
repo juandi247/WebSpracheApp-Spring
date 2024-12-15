@@ -2,11 +2,15 @@ package com.sprache.juandiegodeutsch.models;
 
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
 
 @Entity
 @Table(name = "Progress")
+@Getter
+@Setter
 public class Progress {
 
 

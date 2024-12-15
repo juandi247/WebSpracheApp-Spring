@@ -36,7 +36,8 @@ public class User implements UserDetails {
 
     private int streak;
 
-    private LocalDateTime creation_date;
+    @Column(name = "creation_date")
+    private LocalDateTime creationDate;
 
     @Enumerated(EnumType.STRING)
     Role role;

@@ -2,6 +2,7 @@ package com.sprache.juandiegodeutsch.controllers;
 
 
 import com.sprache.juandiegodeutsch.dtos.DeckRequestDTO;
+import com.sprache.juandiegodeutsch.dtos.GetDecksResponseDTO;
 import com.sprache.juandiegodeutsch.models.User;
 import com.sprache.juandiegodeutsch.services.DeckService;
 import com.sprache.juandiegodeutsch.services.FlashcardService;
@@ -9,10 +10,12 @@ import com.sprache.juandiegodeutsch.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.security.Principal;
+import java.util.List;
 
 @RestController
 @RequestMapping("/deck")
@@ -27,6 +30,19 @@ public class DeckController {
 
 
 //DECKS
+
+
+    @GetMapping("/getall")
+    public ResponseEntity<List<GetDecksResponseDTO>> getDecks(@AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(deckService.getUserDecks(user));
+    }
+
+
+
+
+
+
+
 
     @PostMapping("/create")
     public ResponseEntity<?> createDeck(@Valid @RequestBody DeckRequestDTO request, Principal principal){

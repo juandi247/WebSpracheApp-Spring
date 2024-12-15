@@ -2,6 +2,7 @@ package com.sprache.juandiegodeutsch.services;
 
 
 import com.sprache.juandiegodeutsch.dtos.DeckRequestDTO;
+import com.sprache.juandiegodeutsch.dtos.GetDecksResponseDTO;
 import com.sprache.juandiegodeutsch.models.Deck;
 import com.sprache.juandiegodeutsch.models.User;
 import com.sprache.juandiegodeutsch.repositories.DeckRepository;
@@ -11,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -19,6 +22,24 @@ public class DeckService {
 
 private final DeckRepository deckRepository;
 private final UserRepository userRepository;
+
+
+
+
+//Traer los mazos del usuario.
+
+    public List<GetDecksResponseDTO> getUserDecks(User user) {
+        List<Deck> decks = deckRepository.findByUser(user);
+
+        return decks.stream()
+                .map(deck -> new GetDecksResponseDTO(deck.getId(), deck.getName(), deck.getDescription()))
+                .collect(Collectors.toList());
+
+
+    }
+
+
+
 
 
     //Method to create a category
@@ -38,6 +59,9 @@ private final UserRepository userRepository;
 
         return deckRepository.save(deck);
     }
+
+
+
 
 
 

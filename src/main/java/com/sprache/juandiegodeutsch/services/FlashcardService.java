@@ -2,14 +2,14 @@ package com.sprache.juandiegodeutsch.services;
 
 
 import com.sprache.juandiegodeutsch.dtos.FlashcardRequestDTO;
+import com.sprache.juandiegodeutsch.dtos.FlashcardResponseDTO;
 import com.sprache.juandiegodeutsch.models.*;
-import com.sprache.juandiegodeutsch.repositories.DeckRepository;
-import com.sprache.juandiegodeutsch.repositories.FlashcardRepository;
-import com.sprache.juandiegodeutsch.repositories.TemplateRepository;
-import com.sprache.juandiegodeutsch.repositories.UserRepository;
+import com.sprache.juandiegodeutsch.repositories.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,6 +22,43 @@ public class FlashcardService {
     private final FlashcardRepository flashcardRepository;
     private final UserRepository userRepository;
     private final TemplateRepository templateRepository;
+    private final ProgressRepository progressRepository;
+
+
+    public List<FlashcardResponseDTO> getFlashcardsByDeck(Long deckId, String username) {
+
+
+        Deck deck = deckRepository.findById(deckId)
+                .orElseThrow(() -> new RuntimeException("Deck not found"));
+
+
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+
+
+        if (!deck.getUser().equals(user)) {
+            throw new RuntimeException("This deck does not belong to the user");
+        }
+
+
+        List<Flashcard> flashcards = flashcardRepository.findByDeck(deck);
+
+
+        return flashcards.stream()
+                .map(flashcard -> new FlashcardResponseDTO(
+                        flashcard.getId(),
+                        flashcard.getFront(),
+                        flashcard.getReverse(),
+                        flashcard.getAudio()))
+                .collect(Collectors.toList());
+    }
+
+
+
+
+
 
 
 
@@ -42,11 +79,25 @@ public class FlashcardService {
                     flashcard.setDeck(deck);
                     flashcard.setUser(user);
                     return flashcard;
+
                 })
                 .collect(Collectors.toList());
 
 
-        return flashcardRepository.saveAll(newFlashcards);
+        List<Flashcard> savedFlashcards=flashcardRepository.saveAll(newFlashcards);
+
+        savedFlashcards.forEach(flashcard -> {
+
+            Progress progress = new Progress();
+            progress.setBox_number(1);
+            progress.setCorrect_streak(0);
+            progress.setLast_date_review(null); // No se ha revisado aún
+            progress.setNext_date_review(LocalDate.now()); // Fecha actual
+            progress.setUser(user);
+            progress.setFlashcard(flashcard);
+            progressRepository.save(progress); // Guardar el progreso
+        });
+    return savedFlashcards;
     }
 
 
@@ -110,6 +161,8 @@ public class FlashcardService {
 
         flashcardRepository.saveAll(copiedFlashcards);
 }
+
+
 
 
 

@@ -2,19 +2,21 @@ package com.sprache.juandiegodeutsch.controllers;
 
 
 import com.sprache.juandiegodeutsch.dtos.FlashcardRequestDTO;
+import com.sprache.juandiegodeutsch.dtos.FlashcardResponseDTO;
 import com.sprache.juandiegodeutsch.models.User;
 import com.sprache.juandiegodeutsch.services.FlashcardService;
 import com.sprache.juandiegodeutsch.services.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.security.Principal;
+import java.util.List;
 
 @RestController
-@RequestMapping("/flaschard")
+@RequestMapping("/flashcard")
 @RequiredArgsConstructor
 public class FlashcardController {
 
@@ -39,6 +41,21 @@ private final FlashcardService flashcardService;
             throw new RuntimeException(e);
         }
     }
+
+
+
+    @GetMapping("/getByDeck/{deckId}")
+    public ResponseEntity<List<FlashcardResponseDTO>> getFlashcardsByDeck(
+            @PathVariable Long deckId,
+            @AuthenticationPrincipal User user) {
+
+        List<FlashcardResponseDTO> flashcards = flashcardService.getFlashcardsByDeck(deckId, user.getUsername());
+
+        return ResponseEntity.ok(flashcards);
+    }
+
+
+
 
 
 
