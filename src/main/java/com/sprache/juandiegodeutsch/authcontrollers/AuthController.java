@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -48,30 +49,26 @@ public class AuthController {
 
 
 
-    //Route to validate the token in the frontend
-    @PostMapping("/validate")
-    public ResponseEntity<Boolean> validateToken(@RequestHeader("Authorization") String authorizationHeader) {
-        // Verifing token format
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(false);  // Token no proporcionado correctamente
-        }
+    @GetMapping("/validate")
+    public ResponseEntity<?> validateToken(@RequestHeader("Authorization") String authorizationHeader) {
+        String token = authorizationHeader.substring(7);
 
+        try {
+            String username = jwtService.getUsernameFromToken(token);
 
-        String token = authorizationHeader.substring(7);  // Elimina el prefijo "Bearer "
+            UserDetails user = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        // Get username from token
-        String username = jwtService.getUsernameFromToken(token);
-
-        // Search username in DB
-        UserDetails user = userRepository.findByUsername(username).orElse(null);
-
-
-        if (user != null && jwtService.isTokenValid(token, user)) {
-            return ResponseEntity.ok(true);  // VALID TOKEN
-        } else {
-            return ResponseEntity.ok(false); // INVALID TOKEN
+            if (jwtService.isTokenValid(token, user)) {
+                return ResponseEntity.ok(true); // Token válido
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Invalid token."); // Token inválido
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token.");
         }
     }
+
 
 }
 

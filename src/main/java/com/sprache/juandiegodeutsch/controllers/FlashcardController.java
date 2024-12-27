@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.security.Principal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/flashcard")
@@ -32,10 +34,12 @@ private final FlashcardService flashcardService;
 
         String username = principal.getName();
         User user=userService.findUserByUsername(username);
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Flashchards created successfully");
 
         try {
             flashcardService.createFlashcard(request,user);
-        return ResponseEntity.ok("Flashchards created succesfully");
+        return ResponseEntity.ok(response);
 
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -61,6 +65,7 @@ private final FlashcardService flashcardService;
 
 
     @DeleteMapping("delete/{id}")
+
     public ResponseEntity<?> deleteFlashcard(@PathVariable Long id, Principal principal) {
         String username = principal.getName();
         flashcardService.deleteFlashcard(id, username);

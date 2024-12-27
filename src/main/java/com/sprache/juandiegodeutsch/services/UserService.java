@@ -18,4 +18,8 @@ public class UserService {
         return userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found with username: " + username));
     }
 
+
+    public User save(User user) {
+        return userRepository.save(user); // Guarda el usuario después de modificarlo
+    }
 }

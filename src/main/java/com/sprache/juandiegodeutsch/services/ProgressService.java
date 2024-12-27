@@ -1,10 +1,15 @@
 package com.sprache.juandiegodeutsch.services;
 
 
+import com.sprache.juandiegodeutsch.dtos.FlashcardResponseDTO;
 import com.sprache.juandiegodeutsch.dtos.ProgressRequestDTO;
+import com.sprache.juandiegodeutsch.models.Deck;
+import com.sprache.juandiegodeutsch.models.Flashcard;
 import com.sprache.juandiegodeutsch.models.Progress;
 import com.sprache.juandiegodeutsch.models.User;
+import com.sprache.juandiegodeutsch.repositories.DeckRepository;
 import com.sprache.juandiegodeutsch.repositories.ProgressRepository;
+import com.sprache.juandiegodeutsch.repositories.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,7 +22,47 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class ProgressService {
+
+
+
 private final ProgressRepository progressRepository;
+private final DeckRepository deckRepository;
+private final UserRepository userRepository;
+
+
+
+    public List<FlashcardResponseDTO> getFlashcardsToReviewByDeck(Long deckId, String username) {
+
+        Deck deck = deckRepository.findById(deckId)
+                .orElseThrow(() -> new RuntimeException("Deck not found"));
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!deck.getUser().equals(user)) {
+            throw new RuntimeException("This deck does not belong to the user");
+        }
+
+        LocalDate today = LocalDate.now();
+        List<Progress> progresses = progressRepository.findByFlashcardDeckAndNextDateReviewBeforeOrEqual(deckId, today);
+
+        return progresses.stream()
+                .map(progress -> {
+                    Flashcard flashcard = progress.getFlashcard();
+                    return new FlashcardResponseDTO(
+                            flashcard.getId(),
+                            flashcard.getFront(),
+                            flashcard.getReverse(),
+                            flashcard.getAudio()
+                    );
+                })
+                .collect(Collectors.toList());
+    }
+
+
+
+
+
+
 
 
 

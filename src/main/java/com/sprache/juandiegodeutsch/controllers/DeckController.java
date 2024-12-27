@@ -3,6 +3,7 @@ package com.sprache.juandiegodeutsch.controllers;
 
 import com.sprache.juandiegodeutsch.dtos.DeckRequestDTO;
 import com.sprache.juandiegodeutsch.dtos.GetDecksResponseDTO;
+import com.sprache.juandiegodeutsch.models.Deck;
 import com.sprache.juandiegodeutsch.models.User;
 import com.sprache.juandiegodeutsch.services.DeckService;
 import com.sprache.juandiegodeutsch.services.FlashcardService;
@@ -15,7 +16,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.security.Principal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/deck")
@@ -39,25 +42,26 @@ public class DeckController {
 
 
 
-
-
-
-
-
     @PostMapping("/create")
     public ResponseEntity<?> createDeck(@Valid @RequestBody DeckRequestDTO request, Principal principal){
 
         String username= principal.getName();
-
         User user= userService.findUserByUsername(username);
-
-        try{deckService.createDeck(request,user);}
-        catch (Exception e) {
+        Deck createdDeck = null;
+        try {
+            createdDeck = deckService.createDeck(request, user);
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Deck successfully created");
+        response.put("id", createdDeck.getId());
+        response.put("name", createdDeck.getName());
+        response.put("description", createdDeck.getDescription());
 
-        return ResponseEntity.ok("Deck succesfully created");
+        return ResponseEntity.ok(response);
     }
+
 
 
 
@@ -65,12 +69,12 @@ public class DeckController {
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteDeck(@PathVariable Long id, Principal principal) {
-        String username = principal.getName(); // Obtener el nombre de usuario desde el JWT
-        deckService.deleteDeck(id, username);
-        return ResponseEntity.ok("Deck deleted"); // Código 204 si la eliminación es exitosa
+        String username= principal.getName();
+
+        User user= userService.findUserByUsername(username);
+        deckService.deleteDeck(id, user);
+        return ResponseEntity.ok("Deck deleted");
     }
-
-
 
 
 
@@ -80,11 +84,11 @@ public class DeckController {
     public ResponseEntity<String> copyTemplateToUser(@PathVariable Long templateId, Principal principal) {
         String username = principal.getName();
         try {
-            flashcardService.copyTemplateToUser(templateId, username);  // Llamas al servicio
-            return ResponseEntity.ok("Deck copied successfully");  // Retornas un mensaje de éxito
+            flashcardService.copyTemplateToUser(templateId, username);
+            return ResponseEntity.ok("Deck copied successfully");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error copying deck: " + e.getMessage());  // Manejo de errores
+                    .body("Error copying deck: " + e.getMessage());
         }
     }
 

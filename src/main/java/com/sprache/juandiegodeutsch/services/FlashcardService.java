@@ -7,6 +7,10 @@ import com.sprache.juandiegodeutsch.models.*;
 import com.sprache.juandiegodeutsch.repositories.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
+//import org.springframework.cache.annotation.CacheEvict;
+//import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -23,16 +27,30 @@ public class FlashcardService {
     private final UserRepository userRepository;
     private final TemplateRepository templateRepository;
     private final ProgressRepository progressRepository;
+    private final CacheManager cacheManager;
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  //  @Cacheable(value = "flashcards", key = "#deckId + '-' + #username")
     public List<FlashcardResponseDTO> getFlashcardsByDeck(Long deckId, String username) {
-
 
         Deck deck = deckRepository.findById(deckId)
                 .orElseThrow(() -> new RuntimeException("Deck not found"));
-
-
-
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -61,13 +79,12 @@ public class FlashcardService {
 
 
 
-
-
+ //   @CacheEvict(value = "flashcards", key = "#request.getDeck_id() + '-' + #user.getUsername()")
     @Transactional
     public List<Flashcard> createFlashcard(FlashcardRequestDTO request, User user) {
 
-        Deck deck = deckRepository.findByNameAndUser(request.getDeck(), user)
-                .orElseThrow(() -> new IllegalStateException("Deck with name " + request.getDeck() + " does not exist"));
+        Deck deck = deckRepository.findByIdAndUser((long) request.getDeck_id(), user)
+                .orElseThrow(() -> new IllegalStateException("Deck with name " + request.getDeck_id() + " does not exist"));
 
 
         List<Flashcard> newFlashcards = request.getFlashcardsmap().entrySet().stream()
@@ -104,6 +121,8 @@ public class FlashcardService {
 
 
 
+
+
     public void deleteFlashcard(Long id, String username){
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -116,6 +135,8 @@ public class FlashcardService {
             throw new RuntimeException("You are not allowed to delete this note");
         }
 
+
+      //  evictFlashcardCache(flashcard.getDeck().getId(), username);
         flashcardRepository.delete(flashcard);
     }
 
@@ -163,6 +184,16 @@ public class FlashcardService {
 }
 
 
+
+
+    private void evictFlashcardCache(Long deckId, String username) {
+        // Obtenemos el cache específico del "deckId" y "username"
+        String cacheKey = deckId + "-" + username;
+        Cache cache = cacheManager.getCache("flashcards");
+        if (cache != null) {
+            cache.evict(cacheKey); // Eliminamos la entrada del caché
+        }
+    }
 
 
 

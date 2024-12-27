@@ -1,4 +1,6 @@
 package com.sprache.juandiegodeutsch.models;
 
-public class UserPlan {
+public enum UserPlan {
+    PREMIUM,
+    DEFAULT
 }

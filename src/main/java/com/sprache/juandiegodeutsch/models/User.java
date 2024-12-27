@@ -42,6 +42,19 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     Role role;
 
+    @Enumerated(EnumType.STRING)
+    UserPlan userPlan;
+
+
+    @Column(name = "aipetitions")
+    private int aipetitions;
+
+
+
+
+
+
+
 
     //Relations
 

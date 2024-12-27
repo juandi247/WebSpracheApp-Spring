@@ -29,6 +29,9 @@
 	<properties>
 		<java.version>17</java.version>
 	</properties>
+
+
+
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -93,12 +96,14 @@
 		</dependency>
 
 
+
+
 		<!-- redis  depdency
 		 https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-data-redis -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-redis</artifactId>
-			<version>3.4.0</version>
+			<version>3.3.0</version>
 		</dependency>
 
 
@@ -108,6 +113,7 @@
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
 			<version>2.6.0</version>
 		</dependency>
+
 
 
 
@@ -123,9 +129,11 @@
 			<scope>test</scope>
 		</dependency>
 
-
-
 	</dependencies>
+
+
+
+
 
 	<build>
 		<plugins>

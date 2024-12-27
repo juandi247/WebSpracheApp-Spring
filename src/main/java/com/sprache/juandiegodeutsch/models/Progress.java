@@ -18,12 +18,19 @@ public class Progress {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+    @Column(name = "BoxNumber")
     private int box_number;
 
+    @Column(name="LastReviewDate")
     private LocalDate last_date_review;
 
+
+    @Column(name = "NextReviewDate")
     private LocalDate next_date_review;
 
+
+
+    @Column(name = "CorrectStreak")
     private int correct_streak;
 
 

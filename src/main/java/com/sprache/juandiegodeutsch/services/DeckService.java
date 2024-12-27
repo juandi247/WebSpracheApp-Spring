@@ -9,6 +9,8 @@ import com.sprache.juandiegodeutsch.repositories.DeckRepository;
 import com.sprache.juandiegodeutsch.repositories.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -25,13 +27,14 @@ private final UserRepository userRepository;
 
 
 
-
 //Traer los mazos del usuario.
-
+//@Cacheable(value = "decks", key = "#user.id")
     public List<GetDecksResponseDTO> getUserDecks(User user) {
-        List<Deck> decks = deckRepository.findByUser(user);
+    System.out.println("Fetching from DB for user ID: " + user.getId());
 
-        return decks.stream()
+    List<Deck> decks = deckRepository.findByUser(user);
+
+    return decks.stream()
                 .map(deck -> new GetDecksResponseDTO(deck.getId(), deck.getName(), deck.getDescription()))
                 .collect(Collectors.toList());
 
@@ -43,12 +46,12 @@ private final UserRepository userRepository;
 
 
     //Method to create a category
-
+  //  @CacheEvict(value = "decks", key = "#user.id")
     @Transactional
     public Deck createDeck(DeckRequestDTO request, User user) {
 
         if (deckRepository.findByNameAndUser(request.getName(),user).isPresent()) {
-            throw new RuntimeException("Category with this name already exists");
+            throw new RuntimeException(" this name already exists");
         }
 
         Deck deck=new Deck();
@@ -67,17 +70,15 @@ private final UserRepository userRepository;
 
 
 
-
-    public void deleteDeck(Long id, String username){
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+ //   @CacheEvict(value = "decks", key = "#user.id") // Invalida el caché del usuario
+    public void deleteDeck(Long id, User user){
 
 
         Deck deck = deckRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Deck not found"));
 
         if (!deck.getUser().getId().equals(user.getId())) {
-            throw new RuntimeException("You are not allowed to delete this note");
+            throw new RuntimeException("You are not allowed to delete this deck");
         }
 
         deckRepository.delete(deck);

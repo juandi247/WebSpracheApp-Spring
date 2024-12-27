@@ -3,9 +3,11 @@ package com.sprache.juandiegodeutsch.dtos;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.io.Serializable;
+
 @Data
 @AllArgsConstructor
-public class FlashcardResponseDTO {
+public class FlashcardResponseDTO implements Serializable {
     private Long id;
     private String front;
     private String reverse;

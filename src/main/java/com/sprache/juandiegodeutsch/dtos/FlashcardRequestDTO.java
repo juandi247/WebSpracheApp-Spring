@@ -9,7 +9,7 @@ import java.util.Map;
 @Getter
 @Setter
 public class FlashcardRequestDTO {
-    private String deck;
+    private int deck_id;
     private Map<String, FlashcardData> flashcardsmap;
 
 

@@ -5,6 +5,7 @@ import com.sprache.juandiegodeutsch.dtos.LoginRequestDTO;
 import com.sprache.juandiegodeutsch.dtos.RegisterRequestDTO;
 import com.sprache.juandiegodeutsch.models.Role;
 import com.sprache.juandiegodeutsch.models.User;
+import com.sprache.juandiegodeutsch.models.UserPlan;
 import com.sprache.juandiegodeutsch.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -94,7 +95,9 @@ public class AuthService {
                 .password(encodedPassword)
                 .email(request.getEmail())
                 .role(Role.USER)
+                .userPlan(UserPlan.DEFAULT)
                 .creationDate(LocalDateTime.now())
+                .aipetitions(0)
                 .streak(0)
                 .build();
 
