@@ -11,6 +11,8 @@ import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 //import org.springframework.cache.annotation.CacheEvict;
 //import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -46,17 +48,18 @@ public class FlashcardService {
 
 
 
-  //  @Cacheable(value = "flashcards", key = "#deckId + '-' + #username")
-    public List<FlashcardResponseDTO> getFlashcardsByDeck(Long deckId, String username) {
+  @Cacheable(value = "flashcards", key = "#deckId + '-' + #user.id")
+    public List<FlashcardResponseDTO> getFlashcardsByDeck(Long deckId, User user) {
 
         Deck deck = deckRepository.findById(deckId)
                 .orElseThrow(() -> new RuntimeException("Deck not found"));
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
 
 
 
-        if (!deck.getUser().equals(user)) {
+      if (!deck.getUser().getId().equals(user.getId())) {
+            System.out.println(deck.getUser());
+            System.out.println("AAAAAAAAAAAAAAA");
+            System.out.println(user);
             throw new RuntimeException("This deck does not belong to the user");
         }
 
@@ -79,7 +82,6 @@ public class FlashcardService {
 
 
 
- //   @CacheEvict(value = "flashcards", key = "#request.getDeck_id() + '-' + #user.getUsername()")
     @Transactional
     public List<Flashcard> createFlashcard(FlashcardRequestDTO request, User user) {
 
@@ -108,15 +110,25 @@ public class FlashcardService {
             Progress progress = new Progress();
             progress.setBox_number(1);
             progress.setCorrect_streak(0);
-            progress.setLast_date_review(null); // No se ha revisado aún
-            progress.setNext_date_review(LocalDate.now()); // Fecha actual
+            progress.setLast_date_review(null); //
+            progress.setNext_date_review(LocalDate.now()); // Fec
             progress.setUser(user);
+            progress.setDeck(deck);
             progress.setFlashcard(flashcard);
             progressRepository.save(progress); // Guardar el progreso
         });
-    return savedFlashcards;
-    }
 
+        int newFlashcardsCount = savedFlashcards.size();
+        deck.setTotalWords(deck.getTotalWords() + newFlashcardsCount);
+        deckRepository.save(deck);
+
+
+        evictDeckCache(user.getId());
+        evictFlashcardsCache(deck.getId(), user.getId());
+
+
+        return savedFlashcards;
+    }
 
 
 
@@ -136,7 +148,15 @@ public class FlashcardService {
         }
 
 
-      //  evictFlashcardCache(flashcard.getDeck().getId(), username);
+        Deck deck = flashcard.getDeck();
+        deck.setTotalWords(deck.getTotalWords() - 1);
+        deckRepository.save(deck);
+
+
+        //CACHE EVICT
+        evictDeckCache(user.getId());
+        evictFlashcardsCache(deck.getId(), user.getId());
+
         flashcardRepository.delete(flashcard);
     }
 
@@ -162,36 +182,65 @@ public class FlashcardService {
 
 
         Deck newDeck = new Deck();
-        newDeck.setName(template.getName() + "_copied");
+        newDeck.setName(template.getName() + "_Copied");
         newDeck.setDescription(template.getDescription());
         newDeck.setUser(user);
+        newDeck.setTotalWords(template.getTotalWords());
         deckRepository.save(newDeck);
 
-        // Copiar las flashcards asociadas a la plantilla
+
+
         List<Flashcard> copiedFlashcards = template.getTemplate_flashcards().stream()
                 .map(templateFlashcard -> {
                     Flashcard flashcard = new Flashcard();
                     flashcard.setFront(templateFlashcard.getFront());
                     flashcard.setReverse(templateFlashcard.getReverse());
                     flashcard.setAudio(templateFlashcard.getAudio());
-                    flashcard.setDeck(newDeck);  // Asociamos la flashcard al nuevo mazo
-                    flashcard.setUser(user);  // Asociamos la flashcard al usuario
+                    flashcard.setDeck(newDeck);
+                    flashcard.setUser(user);
                     return flashcard;
                 })
                 .collect(Collectors.toList());
 
-        flashcardRepository.saveAll(copiedFlashcards);
-}
+        List<Flashcard> savedFlashcards=flashcardRepository.saveAll(copiedFlashcards);
+
+        savedFlashcards.forEach(flashcard -> {
+
+            Progress progress = new Progress();
+            progress.setBox_number(1);
+            progress.setCorrect_streak(0);
+            progress.setLast_date_review(null); //
+            progress.setNext_date_review(LocalDate.now());
+            progress.setUser(user);
+            progress.setDeck(newDeck);
+            progress.setFlashcard(flashcard);
+            progressRepository.save(progress);
+        });
+
+        evictDeckCache(user.getId());
+
+    }
 
 
 
+    private void evictFlashcardsCache(Long deckId, Long userId) {
+        String cacheKey = deckId + "-" + userId;
 
-    private void evictFlashcardCache(Long deckId, String username) {
-        // Obtenemos el cache específico del "deckId" y "username"
-        String cacheKey = deckId + "-" + username;
         Cache cache = cacheManager.getCache("flashcards");
+
         if (cache != null) {
-            cache.evict(cacheKey); // Eliminamos la entrada del caché
+            cache.evict(cacheKey);
+        }
+    }
+
+
+
+
+
+    public void evictDeckCache(Long userId) {
+        Cache cache = cacheManager.getCache("decks");
+        if (cache != null) {
+            cache.evict(userId);
         }
     }
 

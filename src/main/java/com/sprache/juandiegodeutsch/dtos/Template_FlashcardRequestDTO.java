@@ -10,7 +10,7 @@ import java.util.Map;
 @Getter
 @Setter
 public class Template_FlashcardRequestDTO {
-    private String template;
+    private Long id_template;
     private Map<String, FlashcardData> template_flashcards;
 
 

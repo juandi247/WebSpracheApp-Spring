@@ -23,7 +23,16 @@ public class Deck {
 
     private String description;
 
+
+    private int totalWords;
+
+    private int toReview;
+
+    private int learnedWords;
+
     private LocalDateTime creation_date;
+
+
 
 
     //Relations
@@ -32,6 +41,11 @@ public class Deck {
     @ManyToOne
     @JoinColumn(name = "id_user")
     private User user;
+
+//Relation with progress
+
+    @OneToMany(mappedBy = "deck",cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Progress> progresses;
 
     //Relation with flashcards table
     @OneToMany(mappedBy = "deck",cascade = CascadeType.ALL, orphanRemoval = true)

@@ -6,6 +6,7 @@ import com.sprache.juandiegodeutsch.dtos.GetDecksResponseDTO;
 import com.sprache.juandiegodeutsch.models.Deck;
 import com.sprache.juandiegodeutsch.models.User;
 import com.sprache.juandiegodeutsch.repositories.DeckRepository;
+import com.sprache.juandiegodeutsch.repositories.ProgressRepository;
 import com.sprache.juandiegodeutsch.repositories.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,30 +25,42 @@ public class DeckService {
 
 
 private final DeckRepository deckRepository;
-private final UserRepository userRepository;
+private final ProgressRepository progressRepository;
 
 
 
-//Traer los mazos del usuario.
-//@Cacheable(value = "decks", key = "#user.id")
-    public List<GetDecksResponseDTO> getUserDecks(User user) {
+
+
+@Cacheable(value = "decks", key = "#user.id")
+public List<GetDecksResponseDTO> getUserDecks(User user) {
     System.out.println("Fetching from DB for user ID: " + user.getId());
 
     List<Deck> decks = deckRepository.findByUser(user);
 
     return decks.stream()
-                .map(deck -> new GetDecksResponseDTO(deck.getId(), deck.getName(), deck.getDescription()))
-                .collect(Collectors.toList());
+            .map(deck -> {
+                int toReview = progressRepository.countToReviewWords(deck.getId(), LocalDate.now());
 
+                int learnedWords = progressRepository.countLearnedWords(deck.getId(), 4);
 
-    }
+                return new GetDecksResponseDTO(
+                        deck.getId(),
+                        deck.getName(),
+                        deck.getDescription(),
+                        deck.getTotalWords(),
+                        toReview,
+                        learnedWords
+                );
+            })
+            .collect(Collectors.toList());
+}
 
 
 
 
 
     //Method to create a category
-  //  @CacheEvict(value = "decks", key = "#user.id")
+  @CacheEvict(value = "decks", key = "#user.id")
     @Transactional
     public Deck createDeck(DeckRequestDTO request, User user) {
 
@@ -59,6 +73,9 @@ private final UserRepository userRepository;
         deck.setDescription(request.getDescription());
         deck.setCreation_date(LocalDateTime.now());
         deck.setUser(user);
+        deck.setToReview(0);
+        deck.setTotalWords(0);
+        deck.setLearnedWords(0);
 
         return deckRepository.save(deck);
     }
@@ -70,7 +87,7 @@ private final UserRepository userRepository;
 
 
 
- //   @CacheEvict(value = "decks", key = "#user.id") // Invalida el caché del usuario
+ @CacheEvict(value = "decks", key = "#user.id") // Invalida el caché del usuario
     public void deleteDeck(Long id, User user){
 
 

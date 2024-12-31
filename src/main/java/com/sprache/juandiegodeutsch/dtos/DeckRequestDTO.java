@@ -14,4 +14,7 @@ public class DeckRequestDTO {
 
     @NotBlank(message = "description cannot be empty")
     private String description;
+
+
+
 }

@@ -20,6 +20,6 @@ public class UserService {
 
 
     public User save(User user) {
-        return userRepository.save(user); // Guarda el usuario después de modificarlo
+        return userRepository.save(user);
     }
 }

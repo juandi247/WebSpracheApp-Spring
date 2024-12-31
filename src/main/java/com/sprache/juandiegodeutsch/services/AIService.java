@@ -4,8 +4,13 @@ package com.sprache.juandiegodeutsch.services;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sprache.juandiegodeutsch.dtos.AIDeckCreationRequestDTO;
-import com.sprache.juandiegodeutsch.models.User;
-import com.sprache.juandiegodeutsch.models.UserPlan;
+import com.sprache.juandiegodeutsch.dtos.CreateDeckAIRequestDTO;
+
+import com.sprache.juandiegodeutsch.models.*;
+import com.sprache.juandiegodeutsch.repositories.DeckRepository;
+import com.sprache.juandiegodeutsch.repositories.FlashcardRepository;
+import com.sprache.juandiegodeutsch.repositories.ProgressRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -15,10 +20,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,12 +34,64 @@ public class AIService {
 
     private final RestTemplate restTemplate;
     private final UserService userService;
+    private final DeckRepository deckRepository;
+    private final FlashcardRepository flashcardRepository;
+    private final ProgressRepository progressRepository;
 
 
     private final String groqApiUrl="https://api.groq.com/openai/v1/chat/completions";
 
     @Value("${api.key.ai}")
     private String groqApiKey;
+
+
+
+
+    public String correctSentenceInGerman(User user, String sentence) {
+        validateUserForAI(user);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + groqApiKey);
+        headers.set("Content-Type", "application/json");
+
+        String content = "I am learning German, and I wrote the following sentence, please correct the following sentence in German: \"" + sentence + "\". " +
+                "If the sentence is correct, just say that the sentence is very good, but if it is incorrect " +
+                "tell me what went wrong and the corrected sentence, but the message should be very short, saying that it was wrong and the corrected sentence, " +
+                "it should not be too long, dont add extra text.";
+
+        Map<String, Object> requestBody = Map.of(
+                "model", "llama-3.1-70b-versatile",  // Utilizando el modelo adecuado para corrección
+                "messages", new Object[]{
+                        Map.of(
+                                "role", "user",
+                                "content", content
+                        )
+                }
+        );
+
+        HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(requestBody, headers);
+
+        try {
+            ResponseEntity<String> response = restTemplate.exchange(
+                    groqApiUrl,
+                    HttpMethod.POST,
+                    requestEntity,
+                    String.class
+            );
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode jsonNode = objectMapper.readTree(response.getBody());
+
+
+
+            return jsonNode.get("choices").get(0).get("message").get("content").asText();
+        } catch (Exception e) {
+            throw new RuntimeException("Error with API Groq: " + e.getMessage(), e);
+        }
+    }
+
+
+
 
 
 
@@ -51,14 +111,14 @@ public class AIService {
                 + " para practicar mi alemán. Debes generar "
                 + aiDeckCreationRequestDTO.getNumberOfFlashcards()
                 + " flashcards en total, y deben ser "
-                + aiDeckCreationRequestDTO.getTypeOfContent()
+                + aiDeckCreationRequestDTO.getTypeOfContent() +" si son sustantivos ponles el articulo der die das,"
                 + ", sobre el tema "
                 + aiDeckCreationRequestDTO.getTopic()
                 + " y deben ser de nivel "
                 + aiDeckCreationRequestDTO.getLevel()
                 + ". No generes texto adicional, solo genera la tabla con una estructura tipo lista y enumeradas siguendo la misma estructura la cual debe ser asi"+
                 "front: contenido de la palabra,back: contenido del reverso y un espacio en blanco para separar la flashcard siguiente" +
-                "sin ningun tipo de titulo,empezando directamente con el contenido de la tabla";
+                "sin ningun tipo de titulo,empezando directamente con el contenido de la tabla.";
 
 
         Map<String, Object> requestBody = Map.of(
@@ -94,6 +154,10 @@ public class AIService {
         }
     }
 
+
+
+
+
     public List<Map<String, String>> parseFlashcardsFromResponse(String apiResponse) {
         List<Map<String, String>> flashcards = new ArrayList<>();
 
@@ -128,8 +192,62 @@ public class AIService {
 
 
 
+    @Transactional
+    public Deck createDeckWithAI(CreateDeckAIRequestDTO request, User user) {
 
-    //Validate user plan for ai functionalities
+        if (deckRepository.findByNameAndUser(request.getName(), user).isPresent()) {
+            throw new RuntimeException("This deck name already exists");
+        }
+
+        Deck deck = new Deck();
+        deck.setName(request.getName());
+        deck.setDescription(request.getDescription());
+        deck.setCreation_date(LocalDateTime.now());
+        deck.setUser(user);
+        Deck savedDeck = deckRepository.save(deck);
+
+        if (request.getFlashcardsmap() != null && !request.getFlashcardsmap().isEmpty()) {
+            List<Flashcard> newFlashcards = request.getFlashcardsmap().entrySet().stream()
+                    .map(entry -> {
+                        Flashcard flashcard = new Flashcard();
+                        flashcard.setFront(entry.getKey());
+                        flashcard.setReverse(entry.getValue().getReverse());
+                        flashcard.setAudio(entry.getValue().getAudio());
+                        flashcard.setDeck(savedDeck);
+                        flashcard.setUser(user);
+                        return flashcard;
+                    })
+                    .collect(Collectors.toList());
+
+            List<Flashcard> savedFlashcards = flashcardRepository.saveAll(newFlashcards);
+
+            savedFlashcards.forEach(flashcard -> {
+                Progress progress = new Progress();
+                progress.setBox_number(1);
+                progress.setCorrect_streak(0);
+                progress.setLast_date_review(null);
+                progress.setNext_date_review(LocalDate.now());
+                progress.setUser(user);
+                progress.setDeck(savedDeck);
+                progress.setFlashcard(flashcard);
+                progressRepository.save(progress);
+            });
+
+
+            deck.setTotalWords(savedFlashcards.size());
+            deckRepository.save(deck);
+        }
+
+
+
+
+        return savedDeck;
+    }
+
+
+
+
+
 
     public void validateUserForAI(User user) {
         if (UserPlan.DEFAULT.equals(user.getUserPlan())) {

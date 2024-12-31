@@ -46,6 +46,8 @@ public class AuthService {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
 
 
+
+
         //looking into the db for the name
         User user = userRepository.findByUsername(request.getUsername()).orElseThrow();
 
@@ -53,10 +55,12 @@ public class AuthService {
         String token = jwtService.getToken(user);
 
 
+
         //returning the token from the user
         return AuthResponseDTO.builder()
                 .token(token)
                 .role(user.getRole().name())
+                .username(user.getUsername())  // Adding the username to the response
                 .build();
 
     }
@@ -108,6 +112,7 @@ public class AuthService {
         return AuthResponseDTO.builder()
                 .token(jwtService.getToken(user))
                 .role(user.getRole().name())
+                .username(user.getUsername())
                 .build();
     }
 }

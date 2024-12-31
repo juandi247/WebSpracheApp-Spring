@@ -1,6 +1,7 @@
 package com.sprache.juandiegodeutsch.models;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -25,6 +26,12 @@ public class Template {
 
     private LocalDateTime creation_date;
 
+
+    private int totalWords;
+
+
+    @Enumerated(EnumType.STRING)
+   private LenguageLevel lenguageLevel;
 
     //Relations
 

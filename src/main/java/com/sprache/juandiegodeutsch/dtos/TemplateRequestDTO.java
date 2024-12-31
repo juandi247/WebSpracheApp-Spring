@@ -14,4 +14,6 @@ public class TemplateRequestDTO {
     @NotBlank(message = "description cannot be empty")
     private String description;
 
+    private String LenguageLevel;
+
 }

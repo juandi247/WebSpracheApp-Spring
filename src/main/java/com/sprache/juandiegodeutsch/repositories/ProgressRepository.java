@@ -18,6 +18,20 @@ public interface ProgressRepository extends JpaRepository<Progress,Long> {
             @Param("date") LocalDate date
     );
 
+
+
+    @Query(value = "SELECT COUNT(*) FROM progress p WHERE p.id_deck = :deckId AND p.next_review_date <= :date", nativeQuery = true)
+    int countToReviewWords(@Param("deckId") Long deckId, @Param("date") LocalDate date);
+
+
+    @Query(value = "SELECT COUNT(*) FROM progress p WHERE p.id_deck = :deckId AND p.box_number >= :boxNumber", nativeQuery = true)
+    int countLearnedWords(@Param("deckId") Long deckId, @Param("boxNumber") int boxNumber);
+
+
+
+
+
+
 }
 
 

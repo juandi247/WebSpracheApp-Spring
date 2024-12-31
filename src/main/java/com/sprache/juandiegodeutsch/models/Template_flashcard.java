@@ -11,6 +11,7 @@ import lombok.Setter;
 @Table
 @Getter
 @Setter
+@Data
 public class Template_flashcard {
 
 

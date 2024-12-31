@@ -18,4 +18,5 @@ public class LoginRequestDTO {
 
     @NotBlank(message = "the password can not be empty")
     String password;
+
 }

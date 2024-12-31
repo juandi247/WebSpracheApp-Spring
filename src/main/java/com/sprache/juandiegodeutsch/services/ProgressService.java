@@ -28,6 +28,7 @@ public class ProgressService {
 private final ProgressRepository progressRepository;
 private final DeckRepository deckRepository;
 private final UserRepository userRepository;
+private final FlashcardService flashcardService;
 
 
 
@@ -103,13 +104,13 @@ private final UserRepository userRepository;
 
             //Update box depending on STREAK
             int streak = progress.getCorrect_streak();
-            if (streak >= 12) {
+            if (streak >= 10) {
                 progress.setBox_number(5);
-            } else if (streak >= 10) {
+            } else if (streak >= 7) {
                 progress.setBox_number(4);
-            } else if (streak >= 8) {
-                progress.setBox_number(3);
             } else if (streak >= 5) {
+                progress.setBox_number(3);
+            } else if (streak >= 3) {
                 progress.setBox_number(2);
             } else {
                 progress.setBox_number(1);
@@ -120,6 +121,8 @@ private final UserRepository userRepository;
 
             progress.setLast_date_review(LocalDate.now());
         });
+
+        flashcardService.evictDeckCache(user.getId());
 
         progressRepository.saveAll(progresses);
     }
@@ -138,7 +141,7 @@ private final UserRepository userRepository;
             case 5:
                 return LocalDate.now().plusWeeks(2);
             default:
-                return LocalDate.now(); // Box 1 revisa el mismo día
+                return LocalDate.now();
         }
 
 

@@ -48,7 +48,7 @@ public class AuthController {
 
 
 
-
+/*
     @GetMapping("/validate")
     public ResponseEntity<?> validateToken(@RequestHeader("Authorization") String authorizationHeader) {
         String token = authorizationHeader.substring(7);
@@ -68,7 +68,7 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token.");
         }
     }
-
+*/
 
 }
 

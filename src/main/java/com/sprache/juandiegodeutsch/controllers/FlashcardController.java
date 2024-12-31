@@ -53,7 +53,7 @@ private final FlashcardService flashcardService;
             @PathVariable Long deckId,
             @AuthenticationPrincipal User user) {
 
-        List<FlashcardResponseDTO> flashcards = flashcardService.getFlashcardsByDeck(deckId, user.getUsername());
+        List<FlashcardResponseDTO> flashcards = flashcardService.getFlashcardsByDeck(deckId, user);
 
         return ResponseEntity.ok(flashcards);
     }

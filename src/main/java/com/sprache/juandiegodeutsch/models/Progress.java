@@ -41,6 +41,11 @@ public class Progress {
     private User user;
 
 
+    @ManyToOne
+    @JoinColumn(name = "id_deck")
+    private Deck deck;
+
+
 
     @OneToOne
     @JoinColumn(name = "id_flashcard")
