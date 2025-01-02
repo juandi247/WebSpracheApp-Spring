@@ -45,5 +45,6 @@ The backend is built using **Spring Boot** and follows a robust architecture:
 ---
 
 💬 Contact
-For questions or feedback, reach out to juand.diaza@gmail.com 📩.
+For questions or feedback, reach out to [juand.diaza@gmail.com](mailto:juand.diaza@gmail.com)  
+ 📩.
 ---
