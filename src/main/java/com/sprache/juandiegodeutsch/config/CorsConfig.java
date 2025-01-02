@@ -19,7 +19,7 @@ public class CorsConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfig = new CorsConfiguration();
-        corsConfig.setAllowedOrigins(Arrays.asList("http://localhost:3001","https://frontend-notes-production.up.railway.app","http://192.168.213.114:3001","https://sprache-app-front-end-web.vercel.app"));
+        corsConfig.setAllowedOrigins(Arrays.asList("http://localhost:3001","https://sprache-app-front-end-web.vercel.app"));
         corsConfig.setAllowedMethods(Arrays.asList("GET", "POST", "PATCH", "DELETE", "OPTIONS"));
         corsConfig.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
         corsConfig.setAllowCredentials(true);

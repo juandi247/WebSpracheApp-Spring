@@ -242,7 +242,7 @@ public class AIService {
         String content = "Du bist ein Deutschlehrer. Und ich lerne Deutsch und brauche, dass du meinen Text korrigierst. Das Niveau des Textes, den ich gewählt habe, ist " + requestDTO.getLevel() +
                 "Das Thema, das ich gewählt habe, ist: " + requestDTO.getTopic() +
                 "Korrigiere die Grammatik, die Rechtschreibfehler und gib mir das Feedback zu dem, was du korrigiert hast" +
-                "Alles auf Deutsch. Ich brauche nur die Korrektur ohne zusätzlichen Text, klar und dem Niveau " + requestDTO.getLevel() + " entsprechend." +
+                "Alles auf Deutsch. Ich brauche nur die Korrektur ohne zusätzlichen Text, klar und dem Niveau " + requestDTO.getLevel() + " entsprechend und bitte auch die Fehler, die ich hatte und ihre Korrektur." +
                 "Hier ist der Text:" + requestDTO.getText();
 
 

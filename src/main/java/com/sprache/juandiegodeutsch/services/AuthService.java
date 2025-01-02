@@ -99,7 +99,7 @@ public class AuthService {
                 .password(encodedPassword)
                 .email(request.getEmail())
                 .role(Role.USER)
-                .userPlan(UserPlan.DEFAULT)
+                .userPlan(UserPlan.PREMIUM)
                 .creationDate(LocalDateTime.now())
                 .aipetitions(0)
                 .streak(0)
