@@ -1,9 +1,7 @@
 package com.sprache.juandiegodeutsch.controllers;
 
 
-import com.sprache.juandiegodeutsch.dtos.AIDeckCreationRequestDTO;
-import com.sprache.juandiegodeutsch.dtos.CreateDeckAIRequestDTO;
-import com.sprache.juandiegodeutsch.dtos.DeckRequestDTO;
+import com.sprache.juandiegodeutsch.dtos.*;
 import com.sprache.juandiegodeutsch.models.Deck;
 import com.sprache.juandiegodeutsch.models.User;
 import com.sprache.juandiegodeutsch.services.AIService;
@@ -54,6 +52,36 @@ public class AIController {
 
         return ResponseEntity.ok(correctedSentence);
     }
+
+
+
+
+
+    @PostMapping("/generate-instructions")
+    public ResponseEntity<String> generateInstructions(@RequestBody InstructionsAIRequestDTO requestDTO, Principal principal) {
+        String username = principal.getName();
+        User user = userService.findUserByUsername(username);
+
+        String instructions = aiService.generateInstructions(user, requestDTO);
+
+        return ResponseEntity.ok(instructions);
+    }
+
+
+
+
+    @PostMapping("/correct-text")
+    public ResponseEntity<String> correctText(@RequestBody CorrectTextAIRequestDTO requestDTO, Principal principal) {
+        String username = principal.getName();
+        User user = userService.findUserByUsername(username);
+
+        String instructions = aiService.correctText(user, requestDTO);
+
+        return ResponseEntity.ok(instructions);
+    }
+
+
+
 
 
 
