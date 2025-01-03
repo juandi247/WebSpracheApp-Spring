@@ -309,7 +309,7 @@ public class AIService {
         headers.set("Content-Type", "application/json");
 
 
- //I know that looks a little bit weird but its just for testing
+
 
         String content = "Necesito que generes una tabla de flashcards, con su front en alemán y su reverso en "
                 + aiDeckCreationRequestDTO.getReverseLanguage()

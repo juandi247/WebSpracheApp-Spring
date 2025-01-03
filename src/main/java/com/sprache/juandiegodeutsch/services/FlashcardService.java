@@ -14,6 +14,7 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import com.sprache.juandiegodeutsch.dtos.EditFlashcardRequestDTO;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -159,6 +160,49 @@ public class FlashcardService {
 
         flashcardRepository.delete(flashcard);
     }
+
+
+
+    public void editFlashcard(Long id, EditFlashcardRequestDTO requestDTO,String username ){
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+
+        Flashcard flashcard = flashcardRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Flashcard not found"));
+
+        if (!flashcard.getUser().getId().equals(user.getId())) {
+            throw new RuntimeException("You are not allowed to edit this note");
+        }
+
+
+
+        if (requestDTO.getFront() != null) {
+            flashcard.setFront(requestDTO.getFront());
+        }
+        if (requestDTO.getReverse() != null) {
+            flashcard.setReverse(requestDTO.getReverse());
+        }
+        if (requestDTO.getAudio() != null) {
+            flashcard.setAudio(requestDTO.getAudio());
+        }
+        Deck deck = flashcard.getDeck();
+        evictFlashcardsCache(deck.getId(), user.getId());
+
+
+
+         flashcardRepository.save(flashcard);
+
+
+
+
+    }
+
+
+
+
+
 
 
 

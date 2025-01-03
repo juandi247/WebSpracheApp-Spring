@@ -1,6 +1,7 @@
 package com.sprache.juandiegodeutsch.controllers;
 
 
+import com.sprache.juandiegodeutsch.dtos.EditFlashcardRequestDTO;
 import com.sprache.juandiegodeutsch.dtos.FlashcardRequestDTO;
 import com.sprache.juandiegodeutsch.dtos.FlashcardResponseDTO;
 import com.sprache.juandiegodeutsch.models.User;
@@ -60,6 +61,14 @@ private final FlashcardService flashcardService;
 
 
 
+
+
+    @PatchMapping("edit/{id}")
+    public ResponseEntity<?> edtiFlaschard(@PathVariable Long id, @RequestBody EditFlashcardRequestDTO requestDTO, Principal principal) {
+        String username = principal.getName();
+        flashcardService.editFlashcard(id,requestDTO, username);
+        return ResponseEntity.ok("Flashcard edited");
+    }
 
 
 
